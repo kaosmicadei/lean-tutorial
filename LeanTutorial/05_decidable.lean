@@ -189,5 +189,6 @@ instance (n : Nat) : Decidable (Even n) := Even.dec n
 Here we saw a small example of how `Decidable` can turn binary propositions into boolean-like
 evaluations, allowing us to use them in propositions and in `if-else` expressions.
 
-Although not all decidability is trivial, the decidability of equality is straightforward enough to be automatised. So, for `DecidableEq` it's preferable to use the `deriving` mechanism.
+Although not all decidability is trivial, the decidability of equality is straightforward enough to
+be automatised. So, for `DecidableEq` it's preferable to use the `deriving` mechanism.
 -/

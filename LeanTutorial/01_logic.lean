@@ -105,7 +105,8 @@ example (P Q : Prop) : P ∨ Q → Q ∨ P := by
 /-
 Here we have used `cases ... with` to split the hypothesis `h : P ∨ Q` into its possible cases.
 The `inl` constructor (`intro left`) corresponds to the case where `P` holds, and the `inr`
-constructor (`intro right`) corresponds to the case where `Q` holds. To return the `Or` structure, we need to specify which side of the disjunction we are providing, either `p` or `q`.
+constructor (`intro right`) corresponds to the case where `Q` holds. To return the `Or` structure,
+we need to specify which side of the disjunction we are providing, either `p` or `q`.
 
 Although the logical OR accepts both propositions `P` and `Q` to be true, in practice it's enough to
 have only one of them to be true at a time. So, encoding `P ∨ Q` as "either P or Q" makes sense and
@@ -154,12 +155,14 @@ In the first case, `m = 0`, so we follow the left side of the disjunction, while
 case, `m = succ m'` and therefore `n` must be zero. So we follow the right side of the disjunction.
 
 ## Biconditional
-The last building block of propositional logic is the biconditional (↔). It represents the logical equivalence between two propositions, `P ↔ Q` means that `P → Q` and `Q → P` are both true. Like
+The last building block of propositional logic is the biconditional (↔). It represents the logical
+equivalence between two propositions, `P ↔ Q` means that `P → Q` and `Q → P` are both true. Like
 the conjunction structure, in Lean, the biconditional is also a product type since both statements
 must be true at the same time.
 
 When working with biconditionals in Lean, we need to be able to prove both directions in order to
-have our goal proved. To isolate each direction, we use the `constructor` tactic, which splits the biconditional into two separate goals.
+have our goal proved. To isolate each direction, we use the `constructor` tactic, which splits the
+biconditional into two separate goals.
 -/
 
 example (A B C : Prop) : A ∨ (B ∧ C) ↔ (A ∨ B) ∧ (A ∨ C) := by
@@ -204,7 +207,8 @@ In Lean, the `Exists` type is defined by a product type that holds a witness `x`
 Although we could write `Exists.intro x (P x)`, Lean provides a much nicer syntax, `∃ x, P x`.
 
 There are two ways to interact with a `Exists` type. The first is when the existential qualifier is
-on the goal of the proof. In that case, we need to provide a witness that satisfies the proposition. That is done using the `exists` tactic.
+on the goal of the proof. In that case, we need to provide a witness that satisfies the
+proposition. That is done using the `exists` tactic.
 -/
 
 example (n : Nat) : n ≠ 0 → ∃ k : Nat, n = k + 1 := by
@@ -214,7 +218,8 @@ example (n : Nat) : n ≠ 0 → ∃ k : Nat, n = k + 1 := by
   | succ n' => exists n'
 
 /-
-The second way to interact with an `Exists` type is when the existential qualifier is in the hypothesis. In that case, we can extract the witness and the proof using the `obtain` tactic.
+The second way to interact with an `Exists` type is when the existential qualifier is in the
+hypothesis. In that case, we can extract the witness and the proof using the `obtain` tactic.
 -/
 
 def Even (n : Nat) := ∃ k : Nat, n = 2*k
@@ -245,7 +250,8 @@ Because Lean is a type dependent language, the universal quantifier is defined a
 called Π-type. A Π-type is function signature `(x : A) → P(x)` that takes an element `x` of type
 `A` and returns a *type* `P(x)` where the final form of the type depends on the value of `x`.
 
-Thanks to the Curry-Howard correspondence, we can say that `(x : A) → P(x)` represents a function that takes an element `x` of type `A` and returns a proposition `P(x)`.
+Thanks to the Curry-Howard correspondence, we can say that `(x : A) → P(x)` represents a function
+that takes an element `x` of type `A` and returns a proposition `P(x)`.
 
 Because in Lean, theorem are functions that return a proposition, writing
 

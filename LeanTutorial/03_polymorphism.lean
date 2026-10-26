@@ -42,7 +42,8 @@ Any type implementing such properties can be considered (or instantiated as) an 
 
 How that translates into polymorphism? Suppose we have a `sum` function that takes a list of some
 type `α` and adds all its elements. The first question is what types `α` are available. Then, we
-ask what addition means for a particular type `α`. We can abstract both questions by constraint the type `α` to be an `AddMonoid`.
+ask what addition means for a particular type `α`. We can abstract both questions by constraint the
+type `α` to be an `AddMonoid`.
 
 -/
 
@@ -114,7 +115,8 @@ Our `AddMonoid` typeclass is quite verbose and have many requirements. In practi
 usually have typeclasses with fewer requirements and constraints, which could see as a "kind of"
 inheritance style.
 
-For example, Lean as a `Zero` typeclass that only requires a `zero` element. We could use that in our `AddMonoid` by writing our typeclass as an *extension* of the `Zero` typeclass.
+For example, Lean as a `Zero` typeclass that only requires a `zero` element. We could use that in
+our `AddMonoid` by writing our typeclass as an *extension* of the `Zero` typeclass.
 -/
 
 class AddMonoid₁ (α : Type) extends Zero α where

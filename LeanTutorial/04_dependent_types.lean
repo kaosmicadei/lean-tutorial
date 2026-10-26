@@ -8,7 +8,8 @@ particular part of the proof and see how the context changes in the Lean InfoVie
 Also, hovering the mouse over expression and tactics can show additional information that are really
 insightful to understand Lean's internal workings.
 
-In the file `01_logic.lean` we briefly mentioned that the universal quantifier `∀` can be seen as a dependent function type, a Π-type.
+In the file `01_logic.lean` we briefly mentioned that the universal quantifier `∀` can be seen as a
+dependent function type, a Π-type.
 
 Here, let's dive a bit more into dependent type and see how they can be used to make type
 signatures more expressive and safe and how that reflects to propositions.
@@ -27,7 +28,8 @@ inductive Vec (α : Type) : Nat → Type where
   | cons : α → Vec α n → Vec α (n + 1)
 
 /-
-What makes the `Vec` a dependent type is the fact that the type is only determined once the length `n` is specified. In other words, the type `Vec α n` depends on the value `n`.
+What makes the `Vec` a dependent type is the fact that the type is only determined once the length
+`n` is specified. In other words, the type `Vec α n` depends on the value `n`.
 -/
 
 def Vec.inner_prod (u v : Vec Nat n) : Nat :=
@@ -94,7 +96,7 @@ def xs : Vec Nat 3 := Vec.cons 1 (Vec.cons 2 (Vec.cons 3 Vec.nil))
 #eval Vec.get xs ⟨0, by decide⟩  -- should output 1
 #eval Vec.get xs ⟨1, by decide⟩  -- should output 2
 #eval Vec.get xs ⟨2, by decide⟩  -- should output 3
--- #eval Vec.get xs ⟨3, by decide⟩  -- should result in a type error because the index is out of bounds
+-- #eval Vec.get xs ⟨3, by decide⟩  -- type error because the index is out of bounds
 
 /-
 By the definition of `Vec.get` the length of the vector `Vec α n` determines the type of the index
@@ -138,7 +140,8 @@ We define the the relation order `≤` based on two properties:
 1. Reflexivity: `n ≤ n` for any natural number `n`.
 2. Step: if `n ≤ m` then `n ≤ succ m`.
 
-Because in Lean 4, propositions are types, we can encode those properties in a inductive type, where each constructor represents a way to prove the proposition.
+Because in Lean 4, propositions are types, we can encode those properties in a inductive type,
+where each constructor represents a way to prove the proposition.
 -/
 inductive ℕ.le (n : ℕ) : ℕ → Prop where
   | refl : ℕ.le n n
@@ -175,7 +178,8 @@ The step case introduces a new variable `m†` representing the *predecessor of 
 `b ≤ m†`. When we apply the `ℕ.le.trans` to this new proof, that is equivalent to perform a
 inductive step. That means, `h1` is the inductive hypothesis.
 
-In fact, because of the structure of `ℕ.le`, we could do the same proof using induction on the proof of `b ≤ c`.
+In fact, because of the structure of `ℕ.le`, we could do the same proof using induction on the
+proof of `b ≤ c`.
 -/
 
 example (a b c : ℕ) : a ≤ b → b ≤ c → a ≤ c := by
@@ -188,7 +192,8 @@ example (a b c : ℕ) : a ≤ b → b ≤ c → a ≤ c := by
 The reason we didn't used induction straight away is mostly for pedagogical reasons. The
 `induction` hides how the recursion is used here, making the result appears a bit magical.
 
-Using `ℕ.le` we can also instantiate our natural number to the `LT` class, allowing us to use the `<` notation. That is done using the definition `a < b := (succ a) ≤ b`.
+Using `ℕ.le` we can also instantiate our natural number to the `LT` class, allowing us to use the
+`<` notation. That is done using the definition `a < b := (succ a) ≤ b`.
 -/
 
 instance : LT ℕ where

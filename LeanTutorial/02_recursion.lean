@@ -11,11 +11,13 @@ insightful to understand Lean's internal workings.
 As a functional programming language, Lean uses recursion to perform loops. The difference with
 other functional programming languages is that Lean doesn't rely on simple termination case when
 compiling a recursive function. The Lean compiler requires a proof that the recursion always
-terminates. For that reason, the compiler relies on two types of recursion: structural recursion and well-founded recursion.
+terminates. For that reason, the compiler relies on two types of recursion: structural recursion
+and well-founded recursion.
 
 
 # Structural Recursion
-A structural recursion is when a variable (or variables) are getting smaller with each recursive call, ensuring termination. One example of structural recursion is the Fibonacci function.
+A structural recursion is when a variable (or variables) are getting smaller with each recursive
+call, ensuring termination. One example of structural recursion is the Fibonacci function.
 -/
 
 def fib (n : Nat) : Nat :=
@@ -25,9 +27,11 @@ def fib (n : Nat) : Nat :=
   | n + 2 => fib n + fib (n + 1)
 
 /-
-Here, the compiler can infer that: 1) the variable `n` has a lower bound (zero) and 2) it decreases with each recursive call.
+Here, the compiler can infer that: 1) the variable `n` has a lower bound (zero) and 2) it decreases
+with each recursive call.
 
-A common use for structural recursion is to define functions over inductive data types, such as lists and trees.
+A common use for structural recursion is to define functions over inductive data types, such as
+lists and trees.
 -/
 
 def map (f : α → β) (xs : List α) : List β :=
@@ -46,12 +50,17 @@ def fold (f : β → α → β) (acc : β) (xs : List α) : β :=
 #eval fold (· + ·) 0 [1, 2, 3]  -- 6
 
 /-
-In the example above, the compiler can, in each call of `map` or `fold`, the argument `xs` is structurally smaller than in the previous call until it reaches the nil case, ensuring termination.
+In the example above, the compiler can see that, in each call of `map` or `fold`, the argument `xs`
+is structurally smaller than in the previous call until it reaches the nil case, ensuring
+termination.
 
 # Well-Founded Recursion
-With non-structural recursion, we have two options. Either we add the `partial` keyword to the definition and tell the compiler "trust me, I know I'm doing"; or we provide a termination proof using well-founded recursion.
+With non-structural recursion, we have two options. Either we add the `partial` keyword to the
+definition and tell the compiler "trust me, I know I'm doing"; or we provide a termination proof
+using well-founded recursion.
 
-As an example of well-founded recursion, let's look at the Euclidean algorithm for computing the greatest common divisor (GCD).
+As an example of well-founded recursion, let's look at the Euclidean algorithm for computing the
+greatest common divisor (GCD).
 -/
 
 def gcd (a b : Nat) : Nat :=
@@ -69,7 +78,8 @@ decreasing_by
 Here, the problem is that that is no explicit base case. It uses `b = 0` but there is no guarantee
 the second argument, `b` decreasing.
 
-Yes, in every call of `gcd`, the second argument is being called using `a % b`, is is strictly smaller that `b`. But the compiler cannot infer that on its own.
+Yes, in every call of `gcd`, the second argument is being called using `a % b`, is is strictly
+smaller that `b`. But the compiler cannot infer that on its own.
 
 So first, we need to tell the compiler which argument is responsible for the termination. In this
 case, the second argument `b`. Then we need to provide a proof of why `b` is decreasing. And the
@@ -85,7 +95,9 @@ safe to use.
 
 # Proofs involving structural recursion
 That is quite easy. At this point the reader is already used to proofs with natural numbers using
-`case ... with` and `induction ... with` constructs. But those tools can do much more than just handle natural numbers. They can also handle structural recursion on lists and other inductive types.
+`case ... with` and `induction ... with` constructs. But those tools can do much more than just
+handle natural numbers. They can also handle structural recursion on lists and other inductive
+types.
 
 As a first example, let's consider the proof of the associativity of the `map` function on lists.
 This is another way to say the `map` function preserves the order of elements in the list.q
