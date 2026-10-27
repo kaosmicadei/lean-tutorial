@@ -295,16 +295,14 @@ example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
   unfold Odd at ho
   obtain ⟨k, hk⟩ := he
   obtain ⟨l, hl⟩ := ho
-  -- if n is even, then n % 2 = 0
-  have h1 : n % 2 = 0 := by
-    rw [hk, Nat.mul_mod_right]
-  -- if n is odd, then n % 2 = 1
-  have h2 : n % 2 = 1 := by
-    rw [hl, Nat.add_mod, Nat.mul_mod_right, Nat.one_mod]
-  -- this leads to a contradiction: 0 = 1; since the compiler cannot infer the contradiction
+  -- If n is even, then n % 2 = 0. If n is odd, then n % 2 = 1. This leads to a
+  -- contradiction: 0 = 1. Since the compiler cannot infer the contradiction
   -- automatically, we provide it explicitly.
-  have h3 : 0 = 1 := by
-    rw [← h1, ← h2]
+  have hfalse : 0 = 1 := calc
+    0 = n % 2 := by
+      rw [hk, Nat.mul_mod_right]
+    _ = 1 := by
+      rw [hl, Nat.add_mod, Nat.mul_mod_right, Nat.one_mod]
   contradiction
 
 /-

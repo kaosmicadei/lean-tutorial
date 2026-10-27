@@ -292,7 +292,7 @@ example (n : Nat) : Even n ↔ ∃ k : Nat, n = 2 * k := by
     | zero => exists 0
     | step h' ih =>
       obtain ⟨k, hk⟩ := ih
-      rw [hk]
+      subst hk
       exists k + 1
   . intro h
     obtain ⟨k, hk⟩ := h
