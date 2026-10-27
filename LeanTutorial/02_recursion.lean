@@ -99,11 +99,11 @@ That is quite easy. At this point the reader is already used to proofs with natu
 handle natural numbers. They can also handle structural recursion on lists and other inductive
 types.
 
-As a first example, let's consider the proof of the associativity of the `map` function on lists.
-This is another way to say the `map` function preserves the order of elements in the list.q
+As a first example, let's consider the proof of the distributivity of the `map` function on lists.
+This is another way to say the `map` function preserves the order of elements in the list.
 -/
 
-theorem map_assoc (xs ys : List α) (f : α → β) : map f (xs ++ ys) = (map f xs) ++ (map f ys) := by
+theorem map_append (xs ys : List α) (f : α → β) : map f (xs ++ ys) = (map f xs) ++ (map f ys) := by
   induction xs with
   | nil =>
     rw [List.nil_append, map, List.nil_append]
@@ -144,7 +144,7 @@ Now, let's see how this pattern applies to other recursive functions, such as `f
 associativity of `fold`.
 -/
 
-theorem fold_assoc (f : β → α → β) (acc : β) (xs ys : List α) :
+theorem fold_append (f : β → α → β) (acc : β) (xs ys : List α) :
   fold f acc (xs ++ ys) = fold f (fold f acc xs) ys := by
   induction xs generalizing acc with
   | nil =>
