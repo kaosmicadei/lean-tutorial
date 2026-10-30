@@ -306,6 +306,12 @@ example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
   contradiction
 
 /-
+Here we used `calc` to explicitly show the steps leading to the contradiction `0 = 1`. Whenever we
+have a situation where we need to prove that `a = b = c = ...`, we can use `calc` to break it down
+into intermediate steps, `a = b`, `b = c`, and so on. The `_` indicates a placeholder for the RHS
+of the previous step in the calculation. In this example we have `0 = n % 2` in the first step and
+`n % 2 = 1` on the second.
+
 # Summary
 Here we saw how the basic of propositional and first-order logic can be represented and used in
 Lean. Those elements are enough to perform many types of proofs. But, as usual, that is just a
