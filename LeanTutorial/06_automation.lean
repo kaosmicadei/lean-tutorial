@@ -10,35 +10,47 @@ insightful to understand Lean's internal workings.
 
 # Automation Tactics
 So far, we have done proofs mostly by hand, providing explicit steps for each logical deduction,
-with some exceptions of `by trivial` and `by decide`.
+with some exceptions of `by trivial` and `by decide`. Those are tools that helps to close goals
+"automagically".
 
-In this file, we will explore how to leverage Lean's automation tactics to simplify and streamline proofs.
+In this file, we will explore some other automation tactics in Lean and how to make proofs more
+concise and efficient. But we will not just use automation as "hey! look how smart Lean is". We will
+focus on understanding how automation works and when it is appropriate to use it.
 
-We already covered how `decide` works in the file `05_decidable.lean`. Here we will focus on other
-two automation tactics: `simp`, used to simplify goals and hypotheses, and `omega`, used to solve
-goals involving linear arithmetic of natural and integer numbers.
+We already covered how `decide` works in the file `05_decidable.lean`. But it's worth to make a recap here.
+
+`decide` is a tactic that can automatically determine if a boolean expression is true or false
+based on its construction. For example, `decide (2 ≤ 3)` would use the construction of the order
+relation on natural number, `Nat.le`, to determine that the statement is true.
+
+`Nat.le` has two constructors: `Nat.le.refl` (`a ≤ a`) for reflexivity and `Nat.le.step`
+(`a ≤ b → a ≤ b+1`) for the inductive step. `decide` uses the step first to trace back a proof that
+`2 ≤ 3 → 2 ≤ 2` and then applies `Nat.le.refl` to close the goal.
 
 ## Simplifying List Proofs with `simp`
-Rewrite goals may be a tedious and repetitive task. Also, it requires looking up and applying the
-appropriate lemmas manually. Thankfully, Lean is equipped with a nice automation tactic called
-`simp` that can simplify goals by automatically.
+Rewrite goals may be a tedious and repetitive task. Also, it requires looking up for the appropriate lemmas and applying them in the correct order manually. Luckily for us, Lean has a smart
+tactic called `simp` that can do this automatically most of the time.
 
-The way `simp` works is quite simple. It uses a database of lemmas and definitions. When we invoke
-`simp`, it looks up for applicable lemmas and applies them until no further simplifications can be
-made.
+`simp` uses a database of lemmas and definitions where it can look up for applicable cases for the
+current goal or a particular hypothesis and use those options to simplify expressions.
 
-We can use `simp` to simplify the goal, or we can use `simp at h` to simplify a particular
-hypothesis `h`. We can also add extra lemmas or definition to the simplification process by passing
-them as arguments to `simp`, like `simp [lemma1, lemma2]`.
+Using `simp` only will try to simplify the current goal. We can also simplify an specific
+hypothesis `h` in the context using `simp at h`.
 
-To see an example of `simp` in practice, let's go back the file `02_recursion.lean` where we
-defined the `map` function for lists and proved its distributivity over list append.
+Some times, `simp` cannot make progress because it doesn't have a particular lemma or definition in
+its database. In those cases, we can provide the missing lemmas/definitions as arguments to `simp`, like `simp [lemma1, lemma2]`.
+
+Let's see an example of `simp` in action by revisiting the proof of the distributivity of `map` over list append done in the file `02_recursion.lean`.
 -/
 
 def map (f : α → β) (xs : List α) : List β :=
   match xs with
   | [] => []
   | x :: xs' => f x :: map f xs'
+
+/-
+In the original proof, we moved step by step through the rewrites and constructor applications to show the distributivity of `map` over list append.
+-/
 
 example (xs ys : List α) (f : α → β) : map f (xs ++ ys) = (map f xs) ++ (map f ys) := by
   induction xs with
@@ -54,8 +66,11 @@ example (xs ys : List α) (f : α → β) : map f (xs ++ ys) = (map f xs) ++ (ma
 
 /-
 Back then, we said that proof was verbose on purpose to illustrate each step clearly. But that is
-not the intent of using a proof assistant like Lean. The idea is the to automatise the proof as
-much as possible.
+not the intent of using a proof assistant like Lean.
+
+The whole goal of an automated proof assistant is to... automatise the process of proving.
+
+So, now that we have seen the magic behind the curtain, we can appreciate how `simp` can automate many of the tedious steps in proofs.
 -/
 
 example (xs ys : List α) (f : α → β) : map f (xs ++ ys) = (map f xs) ++ (map f ys) := by
@@ -64,11 +79,11 @@ example (xs ys : List α) (f : α → β) : map f (xs ++ ys) = (map f xs) ++ (ma
   | cons x xs' ih => simp [map]; exact ih
 
 /-
-This version is much more compact! `simp` does the hard work of find the appropriate lemmas and
-rewrite them. Because `map` is a user defined function, we add it to the list using `simp [map]`.
+This version is much more compact! `simp` does the hard work of finding the appropriate lemmas to
+use. But, because `map` is a user defined function, we need to pass it as an argument to `simp`
+explicitly, `simp [map]`.
 
-However, we could add `map` to the simplification database permanently by marking it with the
-`@[simp]` attribute on its definition.
+There is a way to add user definition to `simp` database, though. We can mark the definition with the `@[simp]` attribute. That will make the definition available to `simp` automatically.
 -/
 
 @[simp] def map' (f : α → β) (xs : List α) : List β :=
@@ -82,10 +97,10 @@ example (xs ys : List α) (f : α → β) : map' f (xs ++ ys) = (map' f xs) ++ (
   | cons x xs' ih => simp; exact ih
 
 /-
-`simp` doesn't need to be everything "magical". In fact, there is a version of `simp` that exposes
-its internal decisions. When ever you want to see which lemmas and definitions `simp` is using, you
-can use `simp?` instead. It reports the exact list of lemmas it used as a `simp only [...]` turning
-what was previously a black box into an explicit rewrite list.
+Using `simp` is convenient, but, some times, we want to know exactly which lemmas and definitions
+it is using. For that, `simp` has a trace version called `simp?` which shows the exact lemmas and
+definitions it applied. It will show a `simp only [...]` list, that can be used, among other
+things, for debugging.
 -/
 
 example (xs ys : List α) (f : α → β) : map' f (xs ++ ys) = (map' f xs) ++ (map' f ys) := by
@@ -104,10 +119,13 @@ integer numbers. It uses Presburger arithmetic to close goals involving:
 * Some support to division and modulo operations.
 * Contradictions arising from the above operations.
 
-It cannot handle non-linear arithmetic like multiplication of two variables or exponentiation. And
-it cannot also reason about arithmetic over rationals and real numbers.
+It cannot handle non-linear arithmetic like multiplication of two variables or exponentiation.
 
-To see a practical example of `omega` in action, let's go back the file `01_logic.lean` where we
+Different than `simp` that uses a database of lemmas, `omega` reasons directly with the arithmetic
+structure using the hypotheses and variables available in the context. That makes `omega` a great
+way to close goals that otherwise would require tedious manual rewriting of arithmetic expressions.
+
+Let's see a practical example of `omega` in action by revisiting the file `01_logic.lean` where we
 discussed even and odd numbers.
 -/
 
@@ -131,11 +149,10 @@ example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
 In the original proof above, we claimed that we had to manually prove the
 contradiction because the compiler could not infer it by itself.
 
-However, `omega` can see we have two conflicting hypotheses about the parity of `n`,
-    hk : n = 2*k
-    hl : n = 2*l + 1
-
-`omega` can, therefore, use these hypotheses to automatically derive a contradiction.
+Because `omega` can use any hypothesis available in the context, it can directly
+derive the contradiction, `0 = 1`, using the hypotheses:
+* hk : n = 2*k
+* hl : n = 2*l + 1
 -/
 
 example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
@@ -147,9 +164,12 @@ example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
   omega
 
 /-
-Here it's worth a digression to mention the use of `intro` and `obtain` can also be "optimized" by
-combining them into a single pattern match. `intro` can, in fact, introduce multiple variables and
-hypotheses at once. `obtain` can destructure nested patterns in a single step.
+Since we are talking about making better use of automation, it's worth to make a
+small digression and mention that `intro` and `obtain` can be better utilised here.
+
+First, `intro` can introduce multiple variables and hypotheses at once, instead
+of one by one. `obtain` is capable of destructuring nested patterns in a single
+step.
 -/
 
 example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
@@ -158,12 +178,13 @@ example : ∀ (n : Nat), ¬(Even n ∧ Odd n) := by
   omega
 
 /-
-That is way more compact that our original proof. The reason we didn't do that before was to avoid
-the question "how this magic works?" arises. Here we can use all those techniques because we are
-sure about what they are trying to do behind curtains.
+This is way more compact than our original proof. The reason we didn't used that
+before was to avoid the question "how this magic works?" from arising. So, again,
+once we have seen how the "magic" works, from now on we can use the more compact
+forms.
 
-Now, let's see and example where the things really get messy and where we can appreciate the power
-of automation.
+Now, let's see and example where the things really get messy and where we can
+appreciate the power of automation.
 
 We could call it the "distributivity of modulo over increment" lemma.
 -/
@@ -185,17 +206,28 @@ example (a b : Nat) (hb : 0 < b) (h : a % b ≠ b - 1) : (a + 1) % b = a % b + 1
 /-
 Confusing, I know.
 
-The trick here is to show that `(a + 1) % b` is equal to `(a % b + 1) % b`. Then, from the
-definition of module, `x % y < y`, we can conclude that `(a % b + 1) % b = a % b + 1` when
-`a % b + 1 < b`.
+The trick here is to use the fact that if `x < y`, then `x % y = x`. But the
+problem is that our `x` here is `a+1`, and we need to relate it to `a % b + 1`
+somehow.
 
-From the module definition, we can immediately to prove that `a % b < b`. From the definition of
-`<`, we can then show that `a % b + 1 ≤ b` since `x < y → x + 1 ≤ y`. Then, from the hypothesis
-`a % b ≠ b - 1`, we can conclude that `a % b + 1 ≠ b`, which is the most complicated step in the
-proof. Finally, we can prove that `a % b + 1 < b`.
+First, we use the fact that, for any three natural numbers `x`, `y`, and `z`,
+we have `(x + y) % z = (x % z + y) % z`.
 
-But notice how all those steps are simple arithmetic manipulations of inequalities and
-contradictions, which is exactly the kind of reasoning `omega` was designed to automate.
+The next step is to show that `a % b + 1 < b`. We know from the definition of
+modulo that `a % b < b`. The trick here comes from the definition of `<`, `x < y`
+means `x + 1 ≤ y`. So, if we know `a % b < b`, then `a % b + 1 ≤ b`. Combining
+this two we can conclude that `a % b + 1 ≤ b`. However, we need strict inequality,
+`a % b + 1 < b`. Here is where our hypothesis `a % b ≠ b - 1` comes in.
+
+From the hypothesis `h`, we can conclude that `a % b + 1 ≠ b` and, from then,
+we can combine it with `a % b + 1 ≤ b` to conclude that `a % b + 1 < b`.
+
+With all that in place we can conclude that
+    `(a + 1) % b = (a % b + 1) % b = a % b + 1`
+
+Ok, that is fine. But look at how many steps we had to go through to prove this
+manually. And most of those steps just arithmetic manipulations. So, let's now
+sit back and let automation handle it.
 -/
 
 example (a b : Nat) (hb : 0 < b) (h : a % b ≠ b - 1) : (a + 1) % b = a % b + 1 := by
@@ -207,9 +239,14 @@ example (a b : Nat) (hb : 0 < b) (h : a % b ≠ b - 1) : (a + 1) % b = a % b + 1
 /-
 Much cleaner and easier to follow than the previous manual proof, isn't it?
 
+The steps discussed are still there, but we let `simp` and `omega` to take care
+of the repetitive middle steps for us, leaving the code focussed on the main goals.
+
 # Summary
-Here we have seen how real automation can simplify proofs. Obviously, there is a
-lot more. But the goal here was to illustrate how using `simp` and `omega` can
-make proofs much more concise and, now that the magic was revealed, easier to
-follow.
+Here we have finally start to use Lean for automation. We saw how `simp` can
+handle long simplifications and how `omega` can take care the arithmetic leaving
+the main steps of the proof clean and easy to follow.
+
+Now, there is on last question: what about `trivial`? That will be discussed in
+the next section where we will talk about macros.
 -/
